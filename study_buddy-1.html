@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Buddy</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
+header{background:#182848;color:white;padding:22px 18px;border-radius:0 0 22px 22px}
+h1{margin:0 0 5px;font-size:28px}.sub{opacity:.8}
+main{max-width:850px;margin:auto;padding:16px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card{background:white;border-radius:18px;padding:16px;box-shadow:0 5px 18px #00000010;margin-bottom:14px}
+.card h2{margin:0 0 12px;font-size:19px}.subjects{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.subject{padding:14px 7px;border-radius:14px;text-align:center;font-weight:bold;background:#eef3ff}
+button{border:0;border-radius:12px;padding:11px 14px;background:#182848;color:white;font-weight:bold;cursor:pointer}
+input,textarea{width:100%;padding:11px;border:1px solid #d8deea;border-radius:10px;margin:5px 0 9px;font:inherit}
+.timer{text-align:center;font-size:42px;font-weight:bold;margin:10px}.actions{display:flex;gap:8px;justify-content:center}
+.task{display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #eee}.task:last-child{border:0}
+.task input{width:auto;margin:0}.progress{height:13px;background:#e8edf5;border-radius:20px;overflow:hidden}.bar{height:100%;width:0;background:#3b82f6}
+@media(max-width:600px){.grid{grid-template-columns:1fr}.subjects{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<header><h1>📚 Study Buddy</h1><div class="sub">Aaj ka focus: padhai par 💪</div></header>
+<main>
+<div class="card">
+<h2>📖 Subjects</h2>
+<div class="subjects">
+<div class="subject">⚡ Physics</div><div class="subject">🧪 Chemistry</div><div class="subject">📐 Maths</div>
+</div>
+</div>
+
+<div class="grid">
+<div class="card">
+<h2>⏱️ Study Timer</h2>
+<div class="timer" id="timer">25:00</div>
+<div class="actions"><button onclick="start()">Start</button><button onclick="pause()">Pause</button><button onclick="reset()">Reset</button></div>
+</div>
+
+<div class="card">
+<h2>🎯 Daily Goal</h2>
+<input id="goal" type="number" min="1" value="5" onchange="saveGoal()"> <span>hours</span>
+<p>Progress: <b id="hours">0</b> / <span id="goalText">5</span> hours</p>
+<div class="progress"><div class="bar" id="bar"></div></div>
+</div>
+</div>
+
+<div class="card">
+<h2>✅ Today's Tasks</h2>
+<div id="tasks"></div>
+<input id="newTask" placeholder="Naya task likho...">
+<button onclick="addTask()">+ Add Task</button>
+</div>
+
+<div class="card">
+<h2>📝 Quick Notes</h2>
+<textarea id="notes" rows="6" placeholder="Yahan apne notes likho..."></textarea>
+<button onclick="saveNotes()">Save Notes</button>
+</div>
+</main>
+
+<script>
+let seconds=1500, interval=null;
+function show(){let m=Math.floor(seconds/60),s=seconds%60;document.getElementById('timer').textContent=`${m}:${String(s).padStart(2,'0')}`}
+function start(){if(!interval) interval=setInterval(()=>{if(seconds>0){seconds--;show()}else pause()},1000)}
+function pause(){clearInterval(interval);interval=null}
+function reset(){pause();seconds=1500;show()}
+let tasks=JSON.parse(localStorage.getItem('tasks')||'[]');
+function render(){document.getElementById('tasks').innerHTML=tasks.map((t,i)=>`<div class="task"><input type="checkbox" ${t.done?'checked':''} onchange="toggle(${i})"><span>${t.text}</span></div>`).join('')}
+function addTask(){let x=document.getElementById('newTask'),v=x.value.trim();if(v){tasks.push({text:v,done:false});localStorage.setItem('tasks',JSON.stringify(tasks));x.value='';render()}}
+function toggle(i){tasks[i].done=!tasks[i].done;localStorage.setItem('tasks',JSON.stringify(tasks));render()}
+function saveGoal(){localStorage.setItem('goal',document.getElementById('goal').value);update()}
+function update(){let g=+localStorage.getItem('goal')||5;document.getElementById('goal').value=g;document.getElementById('goalText').textContent=g;let h=+localStorage.getItem('hours')||0;document.getElementById('hours').textContent=h;document.getElementById('bar').style.width=Math.min(100,h/g*100)+'%'}
+function saveNotes(){localStorage.setItem('notes',document.getElementById('notes').value);alert('Notes saved ✅')}
+document.getElementById('notes').value=localStorage.getItem('notes')||'';render();update();show();
+</script>
+</body>
+</html>
